@@ -130,15 +130,8 @@ export default function AuthScreen({ onAuth }) {
           </Btn>
         </div>
 
-        {/* Admin hint */}
-        <div style={{ marginTop: 22, paddingTop: 18, borderTop: `1px solid ${P.border}`, textAlign: "center" }}>
-          <p style={{ fontSize: 11, color: P.faint }}>
-            Admin access? Use code&nbsp;
-            <span style={{ fontFamily: "'IBM Plex Mono',monospace", background: P.bgMuted, padding: "1px 6px", borderRadius: 4, color: P.muted }}>
-              {import.meta.env.VITE_ADMIN_CODE || "ADMIN0000"}
-            </span>
-          </p>
-        </div>
+      
+        
       </div>
     </div>
   );
