@@ -174,7 +174,13 @@ export default function App() {
 
       case "dashboard":
       default:
-        return <DashboardScreen receipts={receipts} user={user} />;
+       return (
+         <DashboardScreen
+           receipts={receipts}
+           user={user}
+           onSignOut={handleSignOut}
+         />
+       );
     }
   };
 
