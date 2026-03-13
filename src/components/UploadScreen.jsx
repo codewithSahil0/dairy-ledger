@@ -41,7 +41,12 @@ export default function UploadScreen({ onComplete, user }) {
   const [countdown, setCountdown] = useState(0);
   const [ocrResult, setOcrResult] = useState(null);
   const [errMsg, setErrMsg] = useState("");
-  const fileRef = useRef();
+
+  // Two permanent hidden inputs — gallery and camera
+  // Permanent refs are required: iOS/Android block programmatic clicks
+  // on dynamically created inputs because the user gesture is lost.
+  const fileRef = useRef(); // gallery — no capture attribute
+  const cameraRef = useRef(); // camera — capture="environment"
   const timerRef = useRef();
 
   // ---- file handling -------------------------------------------------------
@@ -197,6 +202,28 @@ export default function UploadScreen({ onComplete, user }) {
         </p>
       </div>
 
+      {/* 
+        Both inputs live permanently in the DOM.
+        Gallery input: no capture attribute — opens file picker.
+        Camera input: capture="environment" — opens rear camera directly.
+        Permanent placement is required so iOS/Android honour the user gesture.
+      */}
+      <input
+        ref={fileRef}
+        type="file"
+        accept="image/*"
+        style={{ display: "none" }}
+        onChange={(e) => handleFile(e.target.files[0])}
+      />
+      <input
+        ref={cameraRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        style={{ display: "none" }}
+        onChange={(e) => handleFile(e.target.files[0])}
+      />
+
       {!imgData ? (
         <Card
           style={{
@@ -207,10 +234,7 @@ export default function UploadScreen({ onComplete, user }) {
           }}
           onDragOver={(e) => e.preventDefault()}
           onDrop={handleDrop}
-          onClick={() => {
-            fileRef.current.removeAttribute("capture");
-            fileRef.current.click();
-          }}
+          onClick={() => fileRef.current.click()}
         >
           <div style={{ fontSize: 44, marginBottom: 12 }}>📷</div>
           <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 6 }}>
@@ -219,15 +243,6 @@ export default function UploadScreen({ onComplete, user }) {
           <div style={{ color: P.muted, fontSize: 13, marginBottom: 24 }}>
             JPEG, PNG, HEIC · Max 8 MB
           </div>
-
-          <input
-            ref={fileRef}
-            type="file"
-            accept="image/*"
-            style={{ display: "none" }}
-            onChange={(e) => handleFile(e.target.files[0])}
-            onClick={(e) => e.stopPropagation()}
-          />
 
           <div
             style={{
@@ -240,7 +255,6 @@ export default function UploadScreen({ onComplete, user }) {
             <Btn
               onClick={(e) => {
                 e.stopPropagation();
-                fileRef.current.removeAttribute("capture");
                 fileRef.current.click();
               }}
             >
@@ -250,8 +264,7 @@ export default function UploadScreen({ onComplete, user }) {
               variant="secondary"
               onClick={(e) => {
                 e.stopPropagation();
-                fileRef.current.setAttribute("capture", "environment");
-                fileRef.current.click();
+                cameraRef.current.click();
               }}
             >
               📸 Camera
@@ -376,7 +389,7 @@ export default function UploadScreen({ onComplete, user }) {
                 marginBottom: 10,
               }}
             >
-              {isProcessing ? "Scanning…" : "🤗 Extract with AI Vision (Free)"}
+              {isProcessing ? "Scanning…" : "🤗 Extract with AI Vision"}
             </Btn>
 
             {isProcessing && (

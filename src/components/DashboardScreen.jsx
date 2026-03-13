@@ -13,7 +13,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import P from "../constants/palette";
-import { fmtINR, fmtL, statusColor } from "../utils/helpers";
+import { fmtINR, statusColor } from "../utils/helpers";
 import { Card, KpiCard, Badge, Mono, EmptyState } from "./ui";
 
 /* Build trend from receipts (last 14 days) */
@@ -93,9 +93,15 @@ export default function DashboardScreen({ receipts, user, onSignOut }) {
     },
   ];
 
-  const topSuppliers = [...mine]
-    .sort((a, b) => (b.quantity_liters || 0) - (a.quantity_liters || 0))
-    .slice(0, 5);
+  const parseDate = (str) => {
+    if (!str) return 0;
+    const [d, m, y] = str.split("-").map(Number);
+    return new Date(2000 + y, m - 1, d).getTime();
+  };
+
+  const topSuppliers = [...mine].sort(
+    (a, b) => parseDate(b.date) - parseDate(a.date),
+  );
 
   // ── Mobile header with user info + sign out ──────────────────────────────
   const MobileHeader = () => (
@@ -467,7 +473,7 @@ export default function DashboardScreen({ receipts, user, onSignOut }) {
               fontSize: 15,
             }}
           >
-            Top Suppliers by Volume
+            All Receipts by Date
           </div>
           <div className="table-scroll">
             <table
@@ -479,10 +485,10 @@ export default function DashboardScreen({ receipts, user, onSignOut }) {
                   {[
                     "#",
                     "Farmer",
-                    "Shift",
-                    "Volume",
-                    "FAT %",
+                    "Date",
+                    "Rate (₹/L)",
                     "Amount",
+                    "SNF %",
                     "Status",
                   ].map((h) => (
                     <th
@@ -538,19 +544,21 @@ export default function DashboardScreen({ receipts, user, onSignOut }) {
                           color: P.muted,
                         }}
                       >
-                        {r.shift === "M" ? "Morning" : "Evening"}
+                        {r.date || "—"}
                       </td>
                       <td style={{ padding: "10px 14px" }}>
                         <Mono style={{ fontSize: 13 }}>
-                          {fmtL(r.quantity_liters)}
+                          {fmtINR(r.rate_inr)}
                         </Mono>
-                      </td>
-                      <td style={{ padding: "10px 14px" }}>
-                        <Mono style={{ fontSize: 13 }}>{r.fat_percent}%</Mono>
                       </td>
                       <td style={{ padding: "10px 14px" }}>
                         <Mono style={{ fontSize: 13 }}>
                           {fmtINR(r.amount_inr)}
+                        </Mono>
+                      </td>
+                      <td style={{ padding: "10px 14px" }}>
+                        <Mono style={{ fontSize: 13 }}>
+                          {r.snf_percent != null ? `${r.snf_percent}%` : "—"}
                         </Mono>
                       </td>
                       <td style={{ padding: "10px 14px" }}>
